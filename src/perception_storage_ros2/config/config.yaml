@@ -1,0 +1,67 @@
+perception_storage_node:
+  ros__parameters:
+    LidarSensors:
+      points_left: /livox/lidar_rear
+      points_right: /livox/lidar_front
+      width: 360.0
+      height: 59.0
+      flip: false
+      range_compenstion: 0.05
+
+    TofSensors:
+      points_left: /itof/itof_left_front/tof_frame/pointcloud
+      points_right: /itof/itof_right_front/tof_frame/pointcloud
+      image_left: /itof/itof_left_front/tof_frame/depthz
+      image_right: /itof/itof_right_front/tof_frame/depthz
+      camera_left: /itof/itof_left_front/caminfo
+      camera_right: /itof/itof_right_front/caminfo
+      width: 224.0
+      height: 109.0
+      flip: true
+      range_compenstion: 0.0
+
+    TargetInfo:
+      upper_layer:
+        length: 0.996
+        width: 0.558
+        height: 1.0
+      lower_layer:
+        length: 1.07
+        width: 0.594
+        height: 0.43
+      supplementary:
+        feature: tag
+        paras: [0.21, 0.20]
+
+    SettingPara:
+      trouble_shoting: false
+      sensor_type: lidar
+      batch_size: [1, 20]
+      reference_pose: false
+      stop_criteria: 250
+      auto_start: true
+      sensor_side: right
+
+    FrameNames:
+      front_frame: livox_frame_front
+      rear_frame: livox_frame_rear
+      left_frame: itof_left_front_frame
+      right_frame: itof_right_front_frame
+
+    PubInfo:
+      service_name: /hecbot_perception/storage_detect
+      control_name: /perception_storage/control
+      result_name: /hecbot_perception/storage_result
+      reference_name: /hecbot_perception/storage/reference_pose
+      refer_region_name: /hecbot_perception/storage/reference_region
+      naive_region_name: /hecbot_perception/storage/naive_region
+      raw_name: /hecbot_perception/storage/base_points
+      depth_name: /hecbot_perception/storage/depth_detect
+      hyp_points_name: /hecbot_perception/storage/proposal_points
+      hyp_pose_name: /hecbot_perception/storage/proposal_pose
+      evidence_points_name: /hecbot_perception/storage/evidence_points
+      evidence_pose_name: /hecbot_perception/storage/evidence_pose
+      remember_pose_name: /perception/debug/poses
+      repub_points_name: /perception/source/points
+      repub_image_name: /perception/source/image
+      lidar_capture_name: /perception/capture/points
