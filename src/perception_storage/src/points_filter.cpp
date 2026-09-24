@@ -75,7 +75,8 @@ std::tuple<pcl::PointCloud<pcl::PointXYZI>::Ptr,
 
 std::tuple<pcl::PointCloud<pcl::PointXYZI>::Ptr,
             std::vector<int>,
-            Eigen::VectorXf> points_filter::naive_line(pcl::PointCloud<pcl::PointXYZI>::Ptr &raw_points,float threshold)
+            Eigen::VectorXf> points_filter::naive_line(pcl::PointCloud<pcl::PointXYZI>::Ptr &raw_points,
+                                                       float threshold,bool optimize_coefficients)
 {
   pcl::SampleConsensusModelLine<pcl::PointXYZI>::Ptr _projected_model_(new pcl::SampleConsensusModelLine<pcl::PointXYZI>(raw_points));	
   pcl::RandomSampleConsensus<pcl::PointXYZI> _projected_fit_(_projected_model_);	
@@ -88,6 +89,16 @@ std::tuple<pcl::PointCloud<pcl::PointXYZI>::Ptr,
   pcl::copyPointCloud<pcl::PointXYZI>(*raw_points,_inliers_,*_projected_line_);
   Eigen::VectorXf _projected_coef_;
   _projected_fit_.getModelCoefficients(_projected_coef_);
+  // RANSAC原始系数来自随机样本；按需使用全部内点重估，降低有厚度点带上的方向抖动。
+  if(optimize_coefficients && _inliers_.size()>2 && _projected_coef_.size()==6)
+  {
+    Eigen::VectorXf optimized_coefficients;
+    _projected_model_->optimizeModelCoefficients(_inliers_,_projected_coef_,optimized_coefficients);
+    if(optimized_coefficients.size()==6)
+    {
+      _projected_coef_=optimized_coefficients;
+    }
+  }
 
   return std::make_tuple(_projected_line_,_inliers_,_projected_coef_);
 }

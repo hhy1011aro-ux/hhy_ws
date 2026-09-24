@@ -240,6 +240,8 @@ void PerceptionStorage::set_publishers()
   pub_repub_image=nh_.advertise<sensor_msgs::Image>(config_info.m_pubinfo.repub_image_name, 1);
   // 雷达对货架底座的观测
   pub_lidar_capture=nh_.advertise<sensor_msgs::PointCloud2>(config_info.m_pubinfo.lidar_capture_name, 1);
+  // 调试输出：发布送入参考短线RANSAC之前的完整聚类点。
+  pub_reference_cloud_cluster=nh_.advertise<sensor_msgs::PointCloud2>("/perception/debug/reference/cloud_cluster",1);
 }
 
 void PerceptionStorage::insert_buffer(MsgPacket &msg)
@@ -458,6 +460,18 @@ depth_mapping PerceptionStorage::couple_lidar(std::deque<MsgPacket> &multiframes
         auto &cp_p=planar_lidar_filter->points[cp_index];
         cloud_cluster->points.push_back(cp_p);
       }
+      // hhy add. 2026.09.24
+      // 在RANSAC筛选前发布完整cloud_cluster，保留点带厚度、密度和离群点等原始形态。
+      if(pub_reference_cloud_cluster.getNumSubscribers()>0)
+      {
+        cloud_cluster->width=cloud_cluster->points.size();
+        cloud_cluster->height=1;
+        cloud_cluster->is_dense=false;
+        sensor_msgs::PointCloud2 cloud_cluster_msg;
+        pcl::toROSMsg(*cloud_cluster,cloud_cluster_msg);
+        cloud_cluster_msg.header=pub_header_msg;
+        pub_reference_cloud_cluster.publish(cloud_cluster_msg);
+      }
       pcl::SampleConsensusModelLine<pcl::PointXYZI>::Ptr sim_model(new pcl::SampleConsensusModelLine<pcl::PointXYZI>(cloud_cluster));	
       pcl::RandomSampleConsensus<pcl::PointXYZI> line_fit(sim_model);	
       line_fit.setDistanceThreshold(0.01);
@@ -471,6 +485,17 @@ depth_mapping PerceptionStorage::couple_lidar(std::deque<MsgPacket> &multiframes
       }
       Eigen::VectorXf line_coef_;
       line_fit.getModelCoefficients(line_coef_);
+      // hhy add. 2026.09.24
+      // RANSAC 初始直线模型受随机采样点影响，导致相邻帧间yaw抖动和漏检问题
+      // 使用全部内点重新优化直线系数，避免随机样本斜率抖动使width_diagonal临界失效
+      if(line_coef_.size() == 6 && line_inliers_.size() > 2) {
+        Eigen::VectorXf optimized_line_coef_;
+        sim_model->optimizeModelCoefficients(line_inliers_, line_coef_, optimized_line_coef_);
+        if(optimized_line_coef_.size() == 6) {
+          line_coef_ = optimized_line_coef_;
+        }
+      }
+
       Eigen::Vector3f line_dir_={line_coef_[3],line_coef_[4],line_coef_[5],};
       Eigen::Vector3f line_pt_={line_coef_[0],line_coef_[1],line_coef_[2]};
       std::vector<int> with_line,width_diagonal;

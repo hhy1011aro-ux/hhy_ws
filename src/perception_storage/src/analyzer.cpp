@@ -1,13 +1,19 @@
 #include "perception_storage/analyzer.hpp"
+#include <stdexcept>
 
 analyzer::analyzer(ConfigInfo &config_info,int &task,int &job):valid_task(task),valid_job(job)
 {
   enable_analyzer=config_info.m_settinginfo.trouble_shoting;
   sliding_window=config_info.m_settinginfo.batch_size;
-  shooter_dir=ros::package::getPath("perception_storage")+"/"+"analyzers";
+  const char *home_dir=getenv("HOME");
+  if(home_dir==nullptr || home_dir[0]=='\0')
+  {
+    throw std::runtime_error("HOME is not set; cannot create analyzer output directory");
+  }
+  shooter_dir=(boost::filesystem::path(home_dir)/".ros"/"analyzers").string();
   if(!boost::filesystem::is_directory(shooter_dir))
   {
-    boost::filesystem::create_directory(shooter_dir);
+    boost::filesystem::create_directories(shooter_dir);
   }
   pose_que.clear();
   valid_index=Eigen::Vector3i();

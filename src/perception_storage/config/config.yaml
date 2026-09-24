@@ -38,7 +38,7 @@ TargetInfo:
 # 配置参数
 SettingPara:
   # 记录器
-  trouble_shoting: true
+  trouble_shoting: false
   # tof、lidar
   sensor_type: lidar
   # 多视融合 10 12 15 19 24 30

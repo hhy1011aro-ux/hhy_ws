@@ -2,8 +2,8 @@
  * 基于itof传感器，spider相对货架位置监控功能
 */
 
-#ifndef hecbot_STORAGE_ITOF_H_
-#define hecbot_STORAGE_ITOT_H_
+#ifndef HECBOT_STORAGE_ITOF_H_
+#define HECBOT_STORAGE_ITOT_H_
 
 #include <ros/ros.h>
 #include <sensor_msgs/PointCloud2.h>

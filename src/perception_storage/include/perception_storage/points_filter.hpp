@@ -92,9 +92,11 @@ class points_filter
     std::tuple<pcl::PointCloud<pcl::PointXYZI>::Ptr,
                pcl::PointIndices::Ptr,
                pcl::ModelCoefficients::Ptr> naive_plane(pcl::PointCloud<pcl::PointXYZI>::Ptr & raw_points,float threshold);
+    // optimize_coefficients为true时，使用全部RANSAC内点重新估计最终直线系数。
     std::tuple<pcl::PointCloud<pcl::PointXYZI>::Ptr,
                std::vector<int>,
-               Eigen::VectorXf> naive_line(pcl::PointCloud<pcl::PointXYZI>::Ptr & raw_points,float threshold);
+               Eigen::VectorXf> naive_line(pcl::PointCloud<pcl::PointXYZI>::Ptr & raw_points,
+                                           float threshold,bool optimize_coefficients=false);
     std::tuple<Eigen::Vector3f,Eigen::Vector3f> target_orient(const TargetOrient orient_method,pcl::PointCloud<pcl::PointXYZI>::Ptr & target_points);
 };
 

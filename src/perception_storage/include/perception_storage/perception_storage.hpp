@@ -268,6 +268,8 @@ class PerceptionStorage
     ros::Publisher pub_repub_points;
     ros::Publisher pub_repub_image;
     ros::Publisher pub_lidar_capture;
+    // 参考短线拟合前的完整聚类点，用于分析点带厚度、密度和离群点形态。
+    ros::Publisher pub_reference_cloud_cluster;
     ros::Publisher pub_event;
     // 本次任务的姿态记录
     geometry_msgs::PoseArray task_remember_pose;
