@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-
-<launch>
-    <node pkg="perception_storage" type="perception_storage_node" name="perception_storage_node" respawn="true" output="screen">
-        <rosparam command="load" file="$(find perception_storage)/config/config.yaml" />
-    </node>
-</launch>
